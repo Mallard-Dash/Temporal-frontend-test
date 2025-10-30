@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mysteryboxes Inc. - Global Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1><span class="logo-emoji">🔮</span> Mysteryboxes Inc.</h1>
+        <p>Global Logistics Simulation (Powered by Temporal)</p>
+    </header>
+
+    <main>
+        <div id="config-view" class="view">
+            <h2>Välj din Mysterybox</h2>
+            <p>Varje box simulerar ett unikt globalt logistikflöde.</p>
+            <form id="config-form">
+                
+                <div class="form-group-radio">
+                    <input type="radio" id="scenario-estonia-ok" name="scenario" value="ESTONIA_OK" checked>
+                    <label for="scenario-estonia-ok">
+                        🇪🇺 The "EU Standard" Box (99 kr)
+                        <span><b>Scenario:</b> Lyckat flöde. Skickas från Estland.</span>
+                    </label>
+                </div>
+
+                <div class="form-group-radio">
+                    <input type="radio" id="scenario-china-customs" name="scenario" value="CHINA_CUSTOMS_FAIL">
+                    <label for="scenario-china-customs">
+                        🌏 The "Far East" Box (199 kr)
+                        <span><b>Scenario:</b> Tullproblem. Fastnar i tullen, löser sig efter ett "retry".</span>
+                    </label>
+                </div>
+
+                <div class="form-group-radio">
+                    <input type="radio" id="scenario-reroute" name="scenario" value="ESTONIA_FAIL_REROUTE">
+                    <label for="scenario-reroute">
+                        🔄 The "Volatile Stock" Box (149 kr)
+                        <span><b>Scenario:</b> Lagerfel & Omdirigering. Lagersaldo i Estland är 0. Flödet dirigerar automatiskt om ordern till Kina-fabriken.</span>
+                    </label>
+                </div>
+
+                <div class="form-group-radio">
+                    <input type="radio" id="scenario-crisis" name="scenario" value="CHINA_CRISIS_FAIL">
+                    <label for="scenario-crisis">
+                        🚨 The "High Risk" Box (499 kr)
+                        <span><b>Scenario:</b> Geopolitisk kris. Transportväg blockerad. Kräver <u>mänskligt beslut</u> för att lösas.</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-gradient">Gå till Kassan</button>
+            </form>
+        </div>
+
+        <div id="checkout-view" class="view" style="display: none;">
+            <h2>Kassa</h2>
+            <p>Din order är nästan klar.</p>
+            <div class="checkout-container">
+                <form id="checkout-form">
+                    <h3>Leveransuppgifter</h3>
+                    <div class="form-group"><label for="name">Namn</label><input type="text" id="name" value="Test Testsson" required></div>
+                    <div class="form-group"><label for="email">E-post</label><input type="email" id="email" value="test@example.com" required></div>
+                    <div class="form-group"><label for="address">Adress</label><input type="text" id="address" value="Temporalvägen 1" required></div>
+                </form>
+                <div class="summary-box">
+                    <h3>Din Order</h3>
+                    <div class="product">
+                        <span id="product-name-summary">...</span>
+                        <span id="product-price-summary">... kr</span>
+                    </div>
+                    <hr>
+                    <div class="total"><span>Totalt</span><span id="product-price-total">... kr</span></div>
+                    <button id="pay-button" class="btn-gradient" type="button">Betala</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="workflow-view" class="view" style="display: none;">
+            <h2>Orderstatus</h2>
+            <div id="delivery-date-wrapper">
+                Estimerat leveransdatum: <span id="delivery-date">...</span>
+            </div>
+
+            <div class="workflow-container">
+                <ul class="workflow-steps">
+                    <li class="step" id="step-1"><div class="step-icon">📦</div><div class="step-label">Order Mottagen</div></li>
+                    <li class="step" id="step-2"><div class="step-icon">💳</div><div class="step-label">Betalning OK</div></li>
+                    <li class="step" id="step-3"><div class="step-icon">🗺️</div><div class="step-label">Lagerallokering</div></li>
+                    <li class="step" id="step-4"><div class="step-icon">🏭</div><div class="step-label">Paketerad (Fabrik)</div></li>
+                    <li class="step" id="step-5"><div class="step-icon">✈️</div><div class="step-label">Transport Påbörjad</div></li>
+                    <li class="step" id="step-6"><div class="step-icon">🛂</div><div class="step-label">Tullklarering</div></li>
+                    <li class="step" id="step-7"><div class="step-icon">🚚</div><div class="step-label">Lokal Leverans</div></li>
+                    <li class="step" id="step-8"><div class="step-icon">🏠</div><div class="step-label">Levererad</div></li>
+                </ul>
+            </div>
+
+            <div class="controls">
+                <button id="retryButton">Försök igen</button>
+                <button id="resetButton">Starta om (Ny order)</button>
+            </div>
+            
+            <div id="status-log-wrapper">
+                <h3>Statuslogg:</h3>
+                <pre id="log-output">Väntar på att starta...</pre>
+            </div>
+        </div>
+    </main>
+
+    <div id="intervention-modal-overlay" style="display: none;">
+        <div id="intervention-modal">
+            <div class="modal-header">
+                <h3><span class="logo-emoji">📩</span> Inkommande Larm från Temporal</h3>
+                <span>TILL: Logistik-teamet</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>KRITISKT FEL:</strong> Order <span class="order-id">XYZ-123</span> har drabbats av en blockerad transportväg (Geopolitisk kris).</p>
+                <p>Arbetsflödet är <strong>pausat</strong> i väntan på mänskligt beslut. Hur vill ni fortsätta?</p>
+                
+                <form id="intervention-form">
+                    <div class="intervention-choice">
+                        <input type="radio" id="choice-swe" name="solution" value="SWEDEN" data-cost="30" data-days="2" checked>
+                        <label for="choice-swe">
+                            <strong>Omdirigera till Centrallager (Arlanda, Sverige)</strong>
+                            <span>Uppskattad kostnadsökning: +30%. Leveranstid: 2 dagar.</span>
+                        </label>
+                    </div>
+                    <div class="intervention-choice">
+                        <input type="radio" id="choice-ger" name="solution" value="GERMANY" data-cost="15" data-days="5">
+                        <label for="choice-ger">
+                            <strong>Använd alternativ tillverkare (Berlin, Tyskland)</strong>
+                            <span>Uppskattad kostnadsökning: +15%. Leveranstid: 5 dagar.</span>
+                        </label>
+                    </div>
+                    <div class="intervention-choice">
+                        <input type="radio" id="choice-vtn" name="solution" value="VIETNAM" data-cost="5" data-days="14">
+                        <label for="choice-vtn">
+                            <strong>Använd alternativ tillverkare (Hanoi, Vietnam)</strong>
+                            <span>Uppskattad kostnadsökning: +5%. Leveranstid: 14 dagar.</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-intervention-button" class="btn-gradient">Verkställ & Återuppta Flöde</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
